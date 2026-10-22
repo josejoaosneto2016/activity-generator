@@ -1,0 +1,12 @@
+{
+  "name": "activity-generator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gerador de atividades escolares com uma API segura de IA.",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "devDependencies": {
+    "vercel": "^41.7.8"
+  }
+}

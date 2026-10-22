@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Crie atividades escolares personalizadas com inteligência artificial.">
+  <title>Activity Generator</title>
+  <link rel="icon" href="/logo-activity-generator.png">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <img src="/logo-activity-generator.png" alt="Logo Activity Generator" onerror="this.hidden=true">
+        <div class="brand-copy">Crie. Aprenda. Compartilhe.</div>
+      </div>
+      <div class="pill"><span class="dot"></span> Seu espaço de aprendizagem</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Aprender pode ser divertido</div>
+        <h1>Suas ideias viram <span>atividades!</span></h1>
+        <p>Crie atividades escolares personalizadas para diferentes idades e matérias. Gere questões, copie para o Word ou imprima.</p>
+        <button class="primary" id="ir-para-criador" type="button">＋ Criar atividade</button>
+      </div>
+      <div class="hero-art" aria-hidden="true"><div class="paper"><div class="paper-top"></div><div class="paper-line"></div><div class="paper-line short"></div><div class="paper-check"><div class="check"></div><span></span></div><div class="paper-check"><div class="check"></div><span></span></div><div class="paper-check"><div class="check"></div><span></span></div><div class="paper-line"></div><div class="paper-line short"></div></div></div>
+    </section>
+
+    <div class="section-head" id="criador"><div><h2>Vamos criar sua atividade?</h2><p>Preencha os campos abaixo e clique em gerar.</p></div></div>
+    <main class="workspace">
+      <section class="panel" aria-labelledby="personalize-titulo">
+        <h3 id="personalize-titulo">Personalize</h3><p class="sub">Conte como deve ser sua atividade.</p>
+        <form id="formulario">
+          <div class="field"><label for="materia">Matéria</label><select id="materia" name="materia"><option>Português</option><option>Matemática</option><option>Ciências</option><option>História</option><option>Geografia</option><option>Inglês</option><option>Artes</option><option>Educação Física</option><option>Conhecimentos gerais</option><option>Outra matéria</option></select></div>
+          <div class="two">
+            <div class="field"><label for="ano">Ano escolar</label><select id="ano" name="ano"><option>Educação Infantil</option><option>1º Ano</option><option>2º Ano</option><option>3º Ano</option><option>4º Ano</option><option selected>5º Ano</option><option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option><option>Ensino Médio</option><option>Adultos</option></select></div>
+            <div class="field"><label for="nivel">Dificuldade</label><select id="nivel" name="nivel"><option>Fácil</option><option selected>Médio</option><option>Difícil</option></select></div>
+          </div>
+          <div class="field"><label for="quantidade">Quantidade de questões</label><select id="quantidade" name="quantidade"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></div>
+          <div class="field"><label for="assunto">Assunto da atividade</label><textarea id="assunto" name="assunto" maxlength="500" required placeholder="Ex.: Frações, interpretação de texto, localização do Brasil..."></textarea></div>
+          <div class="field"><label for="tipo">Tipo de questões</label><select id="tipo" name="tipo"><option value="mistas">Variadas (marcar e responder)</option><option value="marcar">Somente múltipla escolha</option><option value="abertas">Somente para responder</option></select></div>
+          <div class="field"><label for="gabarito">Gabarito</label><select id="gabarito" name="gabarito"><option value="sim">Incluir gabarito ao final</option><option value="nao">Não incluir gabarito</option></select></div>
+          <button class="primary full" id="gerar" type="submit">✨ Gerar atividade</button>
+        </form>
+        <div class="note">🔒 A chave da IA fica protegida no servidor e não é enviada para o navegador.</div>
+      </section>
+
+      <section class="panel result" aria-live="polite" aria-label="Resultado da atividade">
+        <div class="empty" id="vazio"><div><div class="empty-icon">✏️</div><h3>Sua atividade aparecerá aqui</h3><p>Escolha a matéria e escreva o assunto. O Activity Generator prepara uma atividade para você copiar e colar no Word.</p></div></div>
+        <div id="saida" hidden></div>
+      </section>
+    </main>
+
+    <section class="history"><div class="section-head"><div><h2>Atividades recentes</h2><p>Atividades criadas nesta sessão.</p></div><button class="secondary" id="limpar" type="button">Limpar lista</button></div><div class="history-list" id="historico"><span class="history-empty">Suas atividades recentes aparecerão aqui.</span></div></section>
+    <footer>Activity Generator · Feito para transformar assuntos em aprendizado ❤️</footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
