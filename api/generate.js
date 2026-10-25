@@ -59,12 +59,16 @@ module.exports = async (req, res) => {
   const contentLength = Number(req.headers['content-length'] || 0);
   if (contentLength > MAX_BODY_BYTES) return sendJson(res, 413, { error: 'O pedido ficou grande demais.' });
   if (!isValidRequest(req.body)) return sendJson(res, 400, { error: 'Confira os campos e tente novamente.' });
-  if (!process.env.OPENAI_API_KEY) return sendJson(res, 503, { error: 'O servidor ainda não está configurado com a chave da IA.' });
+  if (!process.env.OPENROUTER_API_KEY) return sendJson(res, 503, { error: 'O servidor ainda não está configurado com a chave do OpenRouter.' });
 
   const settings = { ...req.body, quantidade: Number(req.body.quantidade), assunto: req.body.assunto.trim() };
   const format = {
-    type: 'json_schema', name: 'atividade_escolar', strict: true,
-    schema: questionSchema()
+    type: 'json_schema',
+    json_schema: {
+      name: 'atividade_escolar',
+      strict: true,
+      schema: questionSchema()
+    }
   };
   const instruction = [
     'Você é um assistente que cria exercícios escolares em português claro e adequado à idade.',
@@ -79,26 +83,34 @@ module.exports = async (req, res) => {
   const input = `Matéria: ${settings.materia}\nAno: ${settings.ano}\nDificuldade: ${settings.nivel}\nAssunto: ${settings.assunto}\nQuantidade: ${settings.quantidade}\nTipo: ${settings.tipo}`;
 
   try {
-    const openAiResponse = await fetch('https://api.openai.com/v1/responses', {
+    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'X-Title': 'Activity Generator'
+      },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || 'gpt-6-luna',
-        instructions: instruction,
-        input,
-        text: { format },
-        max_output_tokens: 7000,
-        store: false
+        model: process.env.OPENROUTER_MODEL || 'openai/gpt-6-luna',
+        messages: [
+          { role: 'system', content: instruction },
+          { role: 'user', content: input }
+        ],
+        response_format: format,
+        reasoning_effort: 'low',
+        max_completion_tokens: 7000
       })
     });
-    if (!openAiResponse.ok) {
-      console.error('OpenAI API error:', openAiResponse.status);
-      if (openAiResponse.status === 429) return sendJson(res, 429, { error: 'Muitas atividades foram pedidas agora. Espere um pouco e tente de novo.' });
+    if (!openRouterResponse.ok) {
+      console.error('OpenRouter API error:', openRouterResponse.status);
+      if (openRouterResponse.status === 429) return sendJson(res, 429, { error: 'Muitas atividades foram pedidas agora. Espere um pouco e tente de novo.' });
+      if (openRouterResponse.status === 402) return sendJson(res, 503, { error: 'O saldo do OpenRouter pode ter acabado. Peça a um adulto para conferir a conta.' });
+      if (openRouterResponse.status === 401 || openRouterResponse.status === 403) return sendJson(res, 503, { error: 'A chave do OpenRouter não foi aceita. Peça a um adulto para conferir a configuração.' });
       return sendJson(res, 502, { error: 'A IA não conseguiu gerar a atividade agora. Tente novamente.' });
     }
-    const result = await openAiResponse.json();
-    const outputText = result.output_text;
-    if (typeof outputText !== 'string') throw new Error('A resposta da IA veio vazia.');
+    const result = await openRouterResponse.json();
+    const outputText = result.choices?.[0]?.message?.content;
+    if (typeof outputText !== 'string') throw new Error('A resposta do OpenRouter veio vazia.');
     const activity = JSON.parse(outputText);
     if (!validateActivity(activity, settings)) throw new Error('A resposta da IA não passou pela validação.');
     return sendJson(res, 200, { atividade: activity });
