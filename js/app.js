@@ -49,7 +49,7 @@ function renderActivity(activity, settings) {
     : '';
   $('saida').innerHTML = `
     <div class="result-top"><div><h3>Atividade gerada!</h3><p>${escapeHtml(settings.materia)} · ${escapeHtml(settings.ano)} · Nível ${escapeHtml(settings.nivel.toLowerCase())}</p></div><div class="actions"><button class="copy" id="copiar" type="button">▣ Copiar atividade</button><button class="secondary" id="imprimir" type="button">Imprimir</button></div></div>
-    <div id="conteudoAtividade"><div class="worksheet-title"><h2>ATIVIDADE DE ${escapeHtml(settings.materia.toLocaleUpperCase('pt-BR'))}</h2><div><b>Assunto:</b> ${escapeHtml(settings.assunto)}</div><div class="student-line">Nome: __________________________________________ &nbsp; Data: ____/____/______</div><div class="student-line">Turma: __________________________</div></div>${questions}${answerKey}</div>`;
+    <div id="conteudoAtividade"><div class="print-brand"><img src="/logo-activity-generator.png" alt="Activity Generator"><span>Crie. Aprenda. Compartilhe.</span></div><div class="worksheet-title"><h2>ATIVIDADE DE ${escapeHtml(settings.materia.toLocaleUpperCase('pt-BR'))}</h2><div><b>Assunto:</b> ${escapeHtml(settings.assunto)}</div><div class="student-line">Nome: __________________________________________ &nbsp; Data: ____/____/______</div><div class="student-line">Turma: __________________________</div></div>${questions}${answerKey}</div>`;
   $('vazio').hidden = true;
   $('saida').hidden = false;
   $('copiar').addEventListener('click', copyActivity);
