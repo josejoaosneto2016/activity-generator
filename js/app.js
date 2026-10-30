@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const recentActivities = [];
+let recentActivities = [];
 let currentActivityText = '';
 
 const profileKey = 'activity-generator-profile';
@@ -10,6 +10,26 @@ function loadProfile() {
 function showProfile(profile) {
   $('signup-screen').hidden = Boolean(profile?.name && profile?.email);
   if (profile?.name) $('welcome-user').textContent = `Olá, ${profile.name}`;
+  recentActivities = profile?.email ? loadRecentActivities(profile.email) : [];
+  renderHistory();
+}
+
+function historyKey(email) {
+  return `activity-generator-history:${email.trim().toLocaleLowerCase('pt-BR')}`;
+}
+
+function loadRecentActivities(email) {
+  try {
+    const items = JSON.parse(localStorage.getItem(historyKey(email)) || '[]');
+    return Array.isArray(items) ? items.filter((item) => item?.activity && item?.settings).slice(0, 5) : [];
+  } catch { return []; }
+}
+
+function saveRecentActivities() {
+  const profile = loadProfile();
+  if (!profile?.email) return;
+  try { localStorage.setItem(historyKey(profile.email), JSON.stringify(recentActivities.slice(0, 5))); }
+  catch { showToast('Atividade criada, mas não foi possível salvar a lista neste navegador.'); }
 }
 showProfile(loadProfile());
 $('signup-form').addEventListener('submit', (event) => {
@@ -104,8 +124,17 @@ async function copyActivity() {
 
 function renderHistory() {
   $('historico').innerHTML = recentActivities.length
-    ? recentActivities.map((item) => `<span class="history-chip">${escapeHtml(item)}</span>`).join('')
+    ? recentActivities.map((item, index) => `<button class="history-card" type="button" data-history-index="${index}"><strong>${escapeHtml(item.settings.materia)} · ${escapeHtml(item.settings.assunto)}</strong><span>${escapeHtml(item.settings.ano)} · ${escapeHtml(new Date(item.createdAt).toLocaleString('pt-BR'))}</span><span class="history-open">Abrir atividade →</span></button>`).join('')
     : '<span class="history-empty">Suas atividades recentes aparecerão aqui.</span>';
+  $('historico').querySelectorAll('[data-history-index]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const item = recentActivities[Number(button.dataset.historyIndex)];
+      if (!item) return;
+      renderActivity(item.activity, item.settings);
+      currentActivityText = buildActivityText(item.activity, item.settings.gabarito === 'sim');
+      document.querySelector('.result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 }
 
 async function generateActivity(event) {
@@ -136,8 +165,9 @@ async function generateActivity(event) {
     if (!response.ok) throw new Error(payload.error || 'Não foi possível gerar a atividade.');
     renderActivity(payload.atividade, settings);
     currentActivityText = buildActivityText(payload.atividade, settings.gabarito === 'sim');
-    recentActivities.unshift(`${settings.materia} · ${settings.assunto}`);
+    recentActivities.unshift({ activity: payload.atividade, settings, createdAt: new Date().toISOString() });
     recentActivities.splice(5);
+    saveRecentActivities();
     renderHistory();
     showToast('Atividade criada! Confira as questões antes de usar.');
   } catch (error) {
@@ -155,6 +185,7 @@ $('ir-para-criador').addEventListener('click', () => {
 });
 $('limpar').addEventListener('click', () => {
   recentActivities.length = 0;
+  saveRecentActivities();
   renderHistory();
   showToast('Lista limpa.');
 });

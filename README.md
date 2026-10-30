@@ -10,7 +10,7 @@ Navegador (HTML/CSS/JS) → /api/generate (Vercel) → OpenRouter → modelo de 
 
 Na primeira abertura, o site pede nome, e-mail e uma senha de pelo menos 8 caracteres. Por enquanto, nome e e-mail são guardados no `localStorage` do navegador para não repetir a tela nesse navegador. A senha é validada no formulário, mas não é salva nem autenticada. Isso é apenas um perfil local, não uma conta segura; para oferecer login real entre dispositivos, conecte um serviço de autenticação como Supabase Auth.
 
-O Supabase ainda não é necessário para gerar atividades. Ele pode ser adicionado depois para guardar atividades de cada pessoa, junto com autenticação e regras de acesso. O histórico atual fica apenas na memória da página e some quando ela é fechada.
+O Supabase ainda não é necessário para gerar atividades. O perfil e as últimas cinco atividades ficam no armazenamento local do navegador; não sincronizam entre dispositivos e podem ser apagados ao limpar os dados do navegador. Para contas reais e dados compartilhados entre dispositivos, conecte autenticação e armazenamento no servidor com regras de acesso.
 
 ## Rodar no seu computador
 
