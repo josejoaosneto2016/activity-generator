@@ -11,13 +11,26 @@
   <script src="/js/app.js" defer></script>
 </head>
 <body>
+  <section class="signup-screen" id="signup-screen" aria-labelledby="signup-title">
+    <form class="signup-card" id="signup-form">
+      <img src="/logo-activity-generator.png" alt="Activity Generator" onerror="this.hidden=true">
+      <div class="eyebrow">Seu espaço de aprendizagem</div>
+      <h1 id="signup-title">Vamos começar?</h1>
+      <p>Crie seu perfil para acessar o gerador de atividades neste navegador.</p>
+      <div class="field"><label for="signup-name">Crie um nome para seu Usuário</label><input id="signup-name" name="name" autocomplete="nickname" required maxlength="60" placeholder="Como quer ser chamado?"></div>
+      <div class="field"><label for="signup-email">E-mail</label><input id="signup-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="voce@exemplo.com"></div>
+      <div class="field"><label for="signup-password">Senha</label><input id="signup-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="Pelo menos 8 caracteres"></div>
+      <button class="primary full" type="submit">Continuar</button>
+      <small>Seu nome e e-mail ficam salvos neste navegador. A senha não é armazenada. Este perfil não é uma conta com autenticação.</small>
+    </form>
+  </section>
   <div class="app">
     <header>
       <div class="brand">
         <img src="/logo-activity-generator.png" alt="Logo Activity Generator" onerror="this.hidden=true">
         <div class="brand-copy">Crie. Aprenda. Compartilhe.</div>
       </div>
-      <div class="pill"><span class="dot"></span> Seu espaço de aprendizagem</div>
+      <div class="pill"><span class="dot"></span> <span id="welcome-user">Seu espaço de aprendizagem</span></div>
     </header>
 
     <section class="hero">

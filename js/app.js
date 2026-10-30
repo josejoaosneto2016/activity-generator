@@ -2,6 +2,37 @@ const $ = (id) => document.getElementById(id);
 const recentActivities = [];
 let currentActivityText = '';
 
+const profileKey = 'activity-generator-profile';
+function loadProfile() {
+  try { return JSON.parse(localStorage.getItem(profileKey) || 'null'); }
+  catch { return null; }
+}
+function showProfile(profile) {
+  $('signup-screen').hidden = Boolean(profile?.name && profile?.email);
+  if (profile?.name) $('welcome-user').textContent = `Olá, ${profile.name}`;
+}
+showProfile(loadProfile());
+$('signup-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  if (!form.reportValidity()) return;
+  const profile = {
+    name: $('signup-name').value.trim(),
+    email: $('signup-email').value.trim()
+  };
+  if (!profile.name || !profile.email) return;
+  try {
+    localStorage.setItem(profileKey, JSON.stringify(profile));
+    showProfile(profile);
+  } catch {
+    const error = document.createElement('p');
+    error.setAttribute('role', 'alert');
+    error.textContent = 'Não foi possível salvar seu perfil neste navegador. Verifique as configurações de armazenamento e tente novamente.';
+    form.querySelector('[role="alert"]')?.remove();
+    form.append(error);
+  }
+});
+
 function showToast(message) {
   const toast = $('toast');
   toast.textContent = message;
