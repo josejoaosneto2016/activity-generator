@@ -21,7 +21,7 @@ function isValidRequest(body) {
     ALLOWED.nivel.includes(body.nivel) &&
     ALLOWED.tipo.includes(body.tipo) &&
     ALLOWED.quantidade.includes(Number(body.quantidade)) &&
-    typeof body.assunto === 'string' && body.assunto.trim().length > 0 && body.assunto.length <= 1000 &&
+    typeof body.assunto === 'string' && body.assunto.trim().length > 0 && body.assunto.length <= 2000 &&
     ['sim', 'nao'].includes(body.gabarito);
 }
 
