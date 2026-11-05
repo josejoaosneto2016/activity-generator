@@ -33,8 +33,9 @@ Sem a chave, a página abre, mas a geração com IA não funciona. Não publique
 
 - `OPENROUTER_API_KEY`: segredo criado na conta OpenRouter do seu pai.
 - `OPENROUTER_MODEL`: identificador do modelo no OpenRouter. O padrão é `openai/gpt-6-luna`; pode ser trocado pela variável de ambiente.
-- A função valida os campos, limita o assunto a 500 caracteres, pede uma resposta estruturada e confere o formato antes de devolver as questões.
+- A função valida os campos, limita o assunto a 1.000 caracteres, pede uma resposta estruturada e confere o formato antes de devolver as questões.
 - A solicitação não pede nome, endereço ou outros dados pessoais. Mesmo assim, não digite informações pessoais no assunto.
+- No formulário, escolha português, inglês ou espanhol para definir o idioma dos enunciados, alternativas e respostas gerados.
 - Questões criadas por IA podem conter erros. Uma pessoa deve revisar o gabarito antes de usar ou distribuir a atividade.
 
 ## Próximos passos para crescer

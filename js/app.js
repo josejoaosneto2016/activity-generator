@@ -2,6 +2,13 @@ const $ = (id) => document.getElementById(id);
 let recentActivities = [];
 let currentActivityText = '';
 
+const activityLabels = {
+  pt: { subject: 'Assunto', year: 'Ano escolar', level: 'Nível', name: 'Nome', date: 'Data', class: 'Turma', answer: 'Resposta', key: 'GABARITO / ORIENTAÇÕES DE RESPOSTA', title: 'ATIVIDADE DE', generated: 'Atividade gerada!', copy: '▣ Copiar atividade', print: 'Imprimir' },
+  en: { subject: 'Topic', year: 'Grade', level: 'Level', name: 'Name', date: 'Date', class: 'Class', answer: 'Answer', key: 'ANSWER KEY / GUIDANCE', title: 'ACTIVITY: ', generated: 'Activity generated!', copy: '▣ Copy activity', print: 'Print' },
+  es: { subject: 'Tema', year: 'Curso', level: 'Nivel', name: 'Nombre', date: 'Fecha', class: 'Clase', answer: 'Respuesta', key: 'RESPUESTAS / ORIENTACIONES', title: 'ACTIVIDAD DE', generated: '¡Actividad creada!', copy: '▣ Copiar actividad', print: 'Imprimir' }
+};
+function labelsFor(settings) { return activityLabels[settings.idioma] || activityLabels.pt; }
+
 const profileKey = 'activity-generator-profile';
 function loadProfile() {
   try { return JSON.parse(localStorage.getItem(profileKey) || 'null'); }
@@ -67,40 +74,42 @@ function escapeHtml(value) {
   })[character]);
 }
 
-function buildActivityText(activity, includeAnswerKey) {
+function buildActivityText(activity, includeAnswerKey, settings) {
+  const labels = labelsFor(settings);
   const lines = [
-    `ATIVIDADE DE ${activity.materia.toLocaleUpperCase('pt-BR')}`,
-    `Assunto: ${activity.assunto}`,
-    `Ano escolar: ${activity.ano} | Nível: ${activity.nivel}`,
-    'Nome: ______________________________ Data: ____/____/______',
+    `${labels.title} ${settings.materia.toLocaleUpperCase()}`,
+    `${labels.subject}: ${settings.assunto}`,
+    `${labels.year}: ${settings.ano} | ${labels.level}: ${settings.nivel}`,
+    `${labels.name}: ______________________________ ${labels.date}: ____/____/______`,
     ''
   ];
   activity.questoes.forEach((question, index) => {
     lines.push(`${index + 1}. ${question.enunciado}`);
     question.alternativas?.forEach((option, optionIndex) => lines.push(`${String.fromCharCode(65 + optionIndex)}) ${option}`));
-    if (!question.alternativas) lines.push('Resposta: ______________________________________________', '_________________________________________________________');
+    if (!question.alternativas?.length) lines.push(`${labels.answer}: ______________________________________________`, '_________________________________________________________');
     lines.push('');
   });
   if (includeAnswerKey) {
-    lines.push('GABARITO / ORIENTAÇÕES:');
+    lines.push(`${labels.key}:`);
     activity.questoes.forEach((question, index) => lines.push(`${index + 1}. ${question.resposta}`));
   }
   return lines.join('\n');
 }
 
 function renderActivity(activity, settings) {
+  const labels = labelsFor(settings);
   const questions = activity.questoes.map((question, index) => {
     const options = question.alternativas?.map((option, optionIndex) =>
       `<div class="option"><b>${String.fromCharCode(65 + optionIndex)})</b> ${escapeHtml(option)}</div>`
-    ).join('') || '<div class="question-answer">Resposta: __________________________________________________</div><div class="question-answer">___________________________________________________________</div>';
+    ).join('') || `<div class="question-answer">${labels.answer}: __________________________________________________</div><div class="question-answer">___________________________________________________________</div>`;
     return `<div class="question"><strong>${index + 1}. ${escapeHtml(question.enunciado)}</strong>${options}</div>`;
   }).join('');
   const answerKey = settings.gabarito === 'sim'
-    ? `<div class="answer-key"><b>GABARITO / ORIENTAÇÕES DE RESPOSTA</b><ol>${activity.questoes.map((question) => `<li>${escapeHtml(question.resposta)}</li>`).join('')}</ol><small>Revise o material antes de usar a atividade.</small></div>`
+    ? `<div class="answer-key"><b>${labels.key}</b><ol>${activity.questoes.map((question) => `<li>${escapeHtml(question.resposta)}</li>`).join('')}</ol></div>`
     : '';
   $('saida').innerHTML = `
-    <div class="result-top"><div><h3>Atividade gerada!</h3><p>${escapeHtml(settings.materia)} · ${escapeHtml(settings.ano)} · Nível ${escapeHtml(settings.nivel.toLowerCase())}</p></div><div class="actions"><button class="copy" id="copiar" type="button">▣ Copiar atividade</button><button class="secondary" id="imprimir" type="button">Imprimir</button></div></div>
-    <div id="conteudoAtividade"><div class="print-brand"><img src="/logo-activity-generator.png" alt="Activity Generator"><span>Crie. Aprenda. Compartilhe.</span></div><div class="worksheet-title"><h2>ATIVIDADE DE ${escapeHtml(settings.materia.toLocaleUpperCase('pt-BR'))}</h2><div><b>Assunto:</b> ${escapeHtml(settings.assunto)}</div><div class="student-line">Nome: __________________________________________ &nbsp; Data: ____/____/______</div><div class="student-line">Turma: __________________________</div></div>${questions}${answerKey}</div>`;
+    <div class="result-top"><div><h3>${labels.generated}</h3><p>${escapeHtml(settings.materia)} · ${escapeHtml(settings.ano)} · ${labels.level} ${escapeHtml(settings.nivel.toLowerCase())}</p></div><div class="actions"><button class="copy" id="copiar" type="button">${labels.copy}</button><button class="secondary" id="imprimir" type="button">${labels.print}</button></div></div>
+    <div id="conteudoAtividade"><div class="print-brand"><img src="/logo-activity-generator.png" alt="Activity Generator"><span>Crie. Aprenda. Compartilhe.</span></div><div class="worksheet-title"><h2>${labels.title} ${escapeHtml(settings.materia.toLocaleUpperCase())}</h2><div><b>${labels.subject}:</b> ${escapeHtml(settings.assunto)}</div><div class="student-line">${labels.name}: __________________________________________ &nbsp; ${labels.date}: ____/____/______</div><div class="student-line">${labels.class}: __________________________</div></div>${questions}${answerKey}</div>`;
   document.querySelector('.result').hidden = false;
   $('saida').hidden = false;
   $('copiar').addEventListener('click', copyActivity);
@@ -131,7 +140,7 @@ function renderHistory() {
       const item = recentActivities[Number(button.dataset.historyIndex)];
       if (!item) return;
       renderActivity(item.activity, item.settings);
-      currentActivityText = buildActivityText(item.activity, item.settings.gabarito === 'sim');
+      currentActivityText = buildActivityText(item.activity, item.settings.gabarito === 'sim', item.settings);
       document.querySelector('.result').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
@@ -144,6 +153,7 @@ async function generateActivity(event) {
   const button = $('gerar');
   const settings = {
     materia: $('materia').value,
+    idioma: $('idioma').value,
     ano: $('ano').value,
     nivel: $('nivel').value,
     assunto: $('assunto').value.trim(),
@@ -164,7 +174,7 @@ async function generateActivity(event) {
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.error || 'Não foi possível gerar a atividade.');
     renderActivity(payload.atividade, settings);
-    currentActivityText = buildActivityText(payload.atividade, settings.gabarito === 'sim');
+    currentActivityText = buildActivityText(payload.atividade, settings.gabarito === 'sim', settings);
     recentActivities.unshift({ activity: payload.atividade, settings, createdAt: new Date().toISOString() });
     recentActivities.splice(5);
     saveRecentActivities();
